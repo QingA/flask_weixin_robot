@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/webapp.iml" filepath="$PROJECT_DIR$/.idea/webapp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/weixin.iml" filepath="$PROJECT_DIR$/.idea/weixin.iml" />
     </modules>
   </component>
 </project>
