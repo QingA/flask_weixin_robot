@@ -85,7 +85,8 @@ def handle_msg(msg_type, recv_msg):
     if msg_type == 'event':
         subscribe = recv_msg.find('Event').text
         if subscribe == 'subscribe':
-            ret_content = "欢迎关注。\n你可以输入 /help 来获取使用帮助。"
+            ret_content = "欢迎关注。\n你可以输入 /help 来获取使用帮助。\n"
+            ret_content += doc_string
 
     elif msg_type == 'text':
         content = recv_msg.find('Content').text
