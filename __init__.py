@@ -1,3 +1,5 @@
+#!/usr/bin/python3.5
+
 from flask import Flask, request, make_response
 import hashlib
 import json
@@ -5,12 +7,20 @@ from lxml import etree
 import time
 import logging
 import requests
-import config
-import os
+from . import config
+import re
+from bs4 import BeautifulSoup
 
 logging.basicConfig(filename='logger.log', level=logging.INFO)
 
 app = Flask(__name__)
+doc_string = """
+发送中文：AI自动回复。(具有情景上下文)\n
+发送图片：进行人脸识别。\n
+发送\"movie [电影名]\": 可以寻找磁力链接（我从不开车 = =）\n
+例\"movie 驴得水\"可以寻找电影驴得水的磁力链接
+"""
+mov_url = "http://www.btkiki.com/s/"
 
 
 @app.route('/')
@@ -72,15 +82,55 @@ def weixin():
 
 def handle_msg(msg_type, recv_msg):
     ret_content = str()
-    if msg_type == 'text':
-        content = recv_msg.find('Content').text
-        try:
-            ret_content = get_turing_response(content, recv_msg.find('FromUserName').text)
-        except Exception as e:
-            logging.error(e)
-            ret_content =  "Sorry. it failed. If you doubt this, plz contact me from 994819188@qq.com"
+    if msg_type == 'event':
+        subscribe = recv_msg.find('Event').text
+        if subscribe == 'subscribe':
+            ret_content = "欢迎关注。\n你可以输入 /help 来获取使用帮助。"
 
-    if msg_type == 'image':
+    elif msg_type == 'text':
+        content = recv_msg.find('Content').text
+        if re.findall("/help", content):
+            ret_content = doc_string
+        elif re.findall("movie( +)(.+)", content):
+            pattern = re.compile("movie( +)(.+)")
+            group = pattern.match(content)
+            # print(group.group(2))
+            res = requests.get(mov_url + group.group(2) + '.html')
+            html = res.content.decode('utf-8')
+            res.close()
+            soup = BeautifulSoup(html, 'lxml')
+            try:
+                movies = soup.findAll('div', {'class': 'g'})
+                for i in range(min(len(movies), 3)):
+                    movie = movies[i]
+                    href = movie.findAll('a', {'target': '_blank'})
+                    if href:
+                        href = href[0].attrs.get('href')
+                        mov_res = requests.get(href)
+                        mov_html = mov_res.content
+                        mov_res.close()
+                        mov_soup = BeautifulSoup(mov_html, 'lxml')
+                        mov_info = mov_soup.findAll('div', {'id': 'result'})
+                        if mov_info:
+                            print(mov_info[0].findAll('h1')[0].get_text())
+                            ret_content += mov_info[0].findAll('h1')[0].get_text()+'\n'
+                            for mov_thing in mov_info[0].findAll('p'):
+                                print(mov_thing.get_text())
+                                ret_content += mov_thing.get_text()+'\n'
+                    print("------------------")
+                    ret_content += "--------------------------------------------"+'\n'
+            except Exception as e:
+                ret_content = "Sorry, 没有找到该电影."
+                print(e)
+
+        else: # get turing response.
+            try:
+                ret_content = get_turing_response(content, recv_msg.find('FromUserName').text)
+            except Exception as e:
+                logging.error(e)
+                ret_content =  "Sorry. it failed. If you doubt this, plz contact me from 994819188@qq.com"
+
+    elif msg_type == 'image':
         pic_url = recv_msg.find('PicUrl').text
         # img_file = requests.get(pic_url)
         # img = img_file.content
@@ -108,7 +158,7 @@ def handle_msg(msg_type, recv_msg):
                     attributes = face['attributes']
                     ret_content += 'gender: '+attributes['gender']['value']+'\n'
                     ret_content += 'age: '+str(attributes['age']['value'])+'\n'
-                    ret_content += 'glasses: '+str(attributes['glass']['value'])
+                    ret_content += 'glasses: '+str(attributes['glass']['value']+'\n')
             else:
                 ret_content = "No Face Detected."
         except Exception as e:
@@ -140,4 +190,4 @@ def get_turing_response(content, from_user):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80, debug=True)
+    app.run(debug=True)
