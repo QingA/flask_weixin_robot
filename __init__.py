@@ -92,8 +92,8 @@ def handle_msg(msg_type, recv_msg):
         content = recv_msg.find('Content').text
         if re.findall("/help", content):
             ret_content = doc_string
-        elif re.findall("movie( +)(.+)", content):
-            pattern = re.compile("movie( +)(.+)")
+        elif re.findall("movie( *)(.+)", content):
+            pattern = re.compile("movie( *)(.+)")
             group = pattern.match(content)
             # print(group.group(2))
             res = requests.get(mov_url + group.group(2) + '.html')

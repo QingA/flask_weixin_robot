@@ -45,12 +45,12 @@ def test_pic():
 
 
 def test_mov():
-    content = "movie 驴得水"
+    content = "movie驴得水"
     mov_url = "http://www.btkiki.com/s/"
-    if re.findall("movie( +)(.+)", content):
-        pattern = re.compile("movie( +)(.+)")
+    if re.findall("movie( *)(.+)", content):
+        pattern = re.compile("movie( *)(.+)")
         group = pattern.match(content)
-        # print(group.group(2))
+        print(group.group(2))
         res = requests.get(mov_url+group.group(2)+'.html')
         html = res.content.decode('utf-8')
         res.close()
