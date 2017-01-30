@@ -15,9 +15,9 @@ logging.basicConfig(filename='logger.log', level=logging.INFO)
 
 app = Flask(__name__)
 doc_string = """
-发送中文：AI自动回复。(具有情景上下文)\n
-发送图片：进行人脸识别。\n
-发送\"movie [电影名]\": 可以寻找磁力链接（我从不开车 = =）\n
+发送中文：AI自动回复。(具有情景上下文)
+发送图片：进行人脸识别。
+发送\"movie [电影名]\": 可以寻找磁力链接（我从不开车 = =）
 例\"movie 驴得水\"可以寻找电影驴得水的磁力链接
 """
 mov_url = "http://www.btkiki.com/s/"
@@ -123,6 +123,8 @@ def handle_msg(msg_type, recv_msg):
             except Exception as e:
                 ret_content = "Sorry, 没有找到该电影."
                 print(e)
+        elif content.find(config.my_name) != -1:
+            ret_content = config.my_name+"是世界上最帅的人！"
 
         else: # get turing response.
             try:
