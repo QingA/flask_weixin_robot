@@ -20,7 +20,6 @@ doc_string = """
 发送\"movie [电影名]\": 可以寻找磁力链接（我从不开车 = =）
 例\"movie 驴得水\"可以寻找电影驴得水的磁力链接
 """
-mov_url = "http://www.btkiki.com/s/"
 
 
 @app.route('/')
@@ -96,6 +95,7 @@ def handle_msg(msg_type, recv_msg):
             pattern = re.compile("movie( *)(.+)")
             group = pattern.match(content)
             # print(group.group(2))
+            mov_url = "http://www.btkiki.com/s/"
             res = requests.get(mov_url + group.group(2) + '.html')
             html = res.content.decode('utf-8')
             res.close()
@@ -175,6 +175,33 @@ def handle_msg(msg_type, recv_msg):
             except Exception as e:
                 print(e)
                 ret_content = "Sorry, failed to get this book"
+        elif re.findall('music( *)(.+)', content):
+            try:
+                pattern =re.compile('music( *)(.+)')
+                group = pattern.match(content)
+                url = 'http://sug.music.baidu.com/info/suggestion'
+                payload = {'word': group.group(2), 'version': '2', 'from': '0'}
+                r = requests.get(url, params=payload)
+                d = r.json()
+                print(d['data']['song'])
+                song = d["data"]["song"][0]
+                songid = song["songid"]
+                ret_content = song['songname'] + '\n' + song['artistname']+'\n'
+                print("find songid: %s" % songid)
+                url = "http://music.baidu.com/data/music/fmlink"
+                payload = {'songIds': songid, 'type': 'flac'}
+                r = requests.get(url, params=payload)
+                d = r.json()
+                print(d)
+                songlink = d["data"]["songList"][0]["songLink"]
+                if songlink:
+                    print("find songlink: " + songlink)
+                    ret_content += "下载链接：" + songlink
+                else:
+                    ret_content = "Sorry, failed to get music."
+            except Exception as e:
+                print(e)
+                ret_content = "Sorry, failed to get music."
         elif content.find(config.my_name) != -1:
             ret_content = config.my_name+"是世界上最帅的人！"
         else: # get turing response.

@@ -77,7 +77,7 @@ def test_mov():
 
 
 def test_music():
-    value = "演员"
+    value = "yellow"
     url = 'http://sug.music.baidu.com/info/suggestion'
     payload = {'word': value, 'version': '2', 'from': '0'}
     print(value)
@@ -88,12 +88,13 @@ def test_music():
     d = r.json()
     # if d is not None and 'data' not in d:
     #     continue
-    print(d)
+
+    print(d['data']['song'])
     songid = d["data"]["song"][0]["songid"]
     print("find songid: %s" % songid)
 
     url = "http://music.baidu.com/data/music/fmlink"
-    payload = {'songIds': songid, 'type': 'flac'}
+    payload = {'songIds': songid, 'type': 'hd'}
     r = requests.get(url, params=payload)
     # contents = r.text
     # d = json.loads(contents, encoding="utf-8")
@@ -166,6 +167,6 @@ if __name__ == "__main__":
     # test_face()
     # test_pic()
     # test_mov()
-    # test_music()
-    test_book()
+    test_music()
+    # test_book()
     # test_douban_rate()
