@@ -143,6 +143,38 @@ def handle_msg(msg_type, recv_msg):
             except Exception as e:
                 print(e)
                 ret_content = "Sorry, failed to fetch douban data."
+        elif content.find('book') != -1:
+            try:
+                pattern = re.compile("book( *)(.+)")
+                group = pattern.match(content)
+                book_url = 'http://www.ireadweek.com/'
+                book_query_url = "http://www.ireadweek.com/index.php/Index/bookList.html?keyword="
+                bookname = group.group(2)
+                html = requests.get(book_query_url + bookname).text
+                soup = BeautifulSoup(html, 'lxml')
+                li = soup.findAll('a', href=re.compile('/index.php/bookInfo/(\d+).html'))
+                res = None
+                max_num = 0
+                if li:
+                    for item in li:
+                        li_res = item.find('div', {'class': 'hanghang-list-num'})
+                        if li_res:
+                            if int(li_res.get_text()) > max_num:
+                                res = item
+                # print(res)
+                href = book_url + res.attrs.get('href')
+                book_html = requests.get(url=href).text
+                book_soup = BeautifulSoup(book_html, "lxml")
+                book_info = book_soup.find('div', {'class': 'hanghang-shu-content-font'})
+                print(book_info.get_text())
+                ret_content += book_info.get_text().strip() + "\n"
+                book_link = book_soup.find('a', {'class': 'downloads'})
+                print(book_link.attrs.get('href'))
+                ret_content += '下载地址： ' + book_link.attrs.get('href')+'\n'
+                ret_content += '内有多种格式供下载'
+            except Exception as e:
+                print(e)
+                ret_content = "Sorry, failed to get this book"
         elif content.find(config.my_name) != -1:
             ret_content = config.my_name+"是世界上最帅的人！"
         else: # get turing response.

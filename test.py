@@ -106,10 +106,28 @@ def test_music():
 
 
 def test_book():
-    url = "http://www.ireadweek.com/index.php/Index/bookList.html?keyword="
+    book_url = 'http://www.ireadweek.com/'
+    book_query_url = "http://www.ireadweek.com/index.php/Index/bookList.html?keyword="
     bookname = "1Q84"
-    html = requests.get(url+bookname).text
-    # print(html)
+    html = requests.get(book_query_url+bookname).text
+    soup = BeautifulSoup(html, 'lxml')
+    li = soup.findAll('a', href=re.compile('/index.php/bookInfo/(\d+).html'))
+    res = None
+    max_num = 0
+    if li:
+        for item in li:
+            li_res = item.find('div', {'class': 'hanghang-list-num'})
+            if li_res:
+                if int(li_res.get_text()) > max_num :
+                    res = item
+    # print(res)
+    href = book_url + res.attrs.get('href')
+    book_html = requests.get(url=href).text
+    book_soup = BeautifulSoup(book_html, "lxml")
+    book_info = book_soup.find('div', {'class': 'hanghang-shu-content-font'})
+    print(book_info.get_text())
+    book_link = book_soup.find('a', {'class': 'downloads'})
+    print(book_link.attrs.get('href'))
 
 
 def test_douban_login():
