@@ -108,8 +108,40 @@ def test_music():
 def test_book():
     url = "http://www.ireadweek.com/index.php/Index/bookList.html?keyword="
     bookname = "1Q84"
-    r = requests.get(url+bookname)
-    print(r.content.decode("utf-8"))
+    html = requests.get(url+bookname).text
+    # print(html)
+
+
+def test_douban_login():
+    login_url = "https://accounts.douban.com/login"
+    data = {
+        'redir': "https://www.douban.com",
+        'form_email': config.douban_email,
+        'form_password': config.douban_password,
+        'remember': 'on',
+        'login': '登录'
+    }
+    session = requests.Session()
+    headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 6.1)\
+               AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36'}
+    r = session.post(login_url, data=data, headers=headers)
+    print(r.text)
+
+
+def test_douban_rate():
+    ret_content = str()
+    base_url = 'https://www.douban.com/search?q='
+    content = '西游记'
+    html = requests.get(base_url+content).text
+    soup = BeautifulSoup(html, 'lxml')
+    results = soup.findAll('div', {'class': 'result'})
+    for cnt in range(min(3, len(results))):
+        item = results[cnt]
+        print(cnt+1, item.get_text().replace('\n', '').replace('\t', '').replace(' ',''))
+        link = item.findAll('a', {'class': 'nbg'})
+        if link:
+            print(link[0].attrs.get('href'))
+        print('------------------------------------\n')
 
 
 if __name__ == "__main__":
@@ -118,3 +150,4 @@ if __name__ == "__main__":
     # test_mov()
     # test_music()
     test_book()
+    # test_douban_rate()

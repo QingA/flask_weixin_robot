@@ -123,9 +123,28 @@ def handle_msg(msg_type, recv_msg):
             except Exception as e:
                 ret_content = "Sorry, 没有找到该电影."
                 print(e)
+        elif re.findall("douban( *)(.+)", content):
+            try:
+                pattern = re.compile("douban( *)(.+)")
+                group = pattern.match(content)
+                base_url = 'https://www.douban.com/search?q='
+                html = requests.get(base_url + group.group(2)).text
+                soup = BeautifulSoup(html, 'lxml')
+                results = soup.findAll('div', {'class': 'result'})
+                for cnt in range(min(3, len(results))):
+                    item = results[cnt]
+                    des = item.get_text().replace('\n', '').replace('\t', '').replace(' ', '')
+                    print(cnt + 1, des)
+                    ret_content += str(cnt+1)+': '+des
+                    link = item.findAll('a', {'class': 'nbg'})
+                    if link:
+                        ret_content += link[0].attrs.get('href')+'\n'
+                    ret_content += '------------------------------------\n'
+            except Exception as e:
+                print(e)
+                ret_content = "Sorry, failed to fetch douban data."
         elif content.find(config.my_name) != -1:
             ret_content = config.my_name+"是世界上最帅的人！"
-
         else: # get turing response.
             try:
                 ret_content = get_turing_response(content, recv_msg.find('FromUserName').text)
