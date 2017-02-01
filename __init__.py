@@ -18,7 +18,10 @@ doc_string = """
 发送中文：AI自动回复。(具有情景上下文)
 发送图片：进行人脸识别。
 发送\"movie [电影名]\": 可以寻找磁力链接（我从不开车 = =）
-例\"movie 驴得水\"可以寻找电影驴得水的磁力链接
+（例\"movie 驴得水\"可以寻找电影驴得水的磁力链接）
+发送\"douban [电影or书籍...]\"可以查看评分及豆瓣链接
+发送\"book [书名]\"可以获得电子书（提供txt, pdf, mobi, azw多种格式）
+发送\"music [音乐名]\"可以获得下载外链（浏览器打开直接下载）
 """
 
 
@@ -186,7 +189,7 @@ def handle_msg(msg_type, recv_msg):
                 print(d['data']['song'])
                 song = d["data"]["song"][0]
                 songid = song["songid"]
-                ret_content = song['songname'] + '\n' + song['artistname']+'\n'
+                ret_content = "name: "+song['songname']+'\n'+"singer: "+song['artistname']+'\n'
                 print("find songid: %s" % songid)
                 url = "http://music.baidu.com/data/music/fmlink"
                 payload = {'songIds': songid, 'type': 'flac'}
@@ -196,7 +199,8 @@ def handle_msg(msg_type, recv_msg):
                 songlink = d["data"]["songList"][0]["songLink"]
                 if songlink:
                     print("find songlink: " + songlink)
-                    ret_content += "下载链接：" + songlink
+                    ret_content += "下载链接：" + songlink + '\n'
+                    ret_content += "使用浏览器或下载器打开此链接可直接下载（微信中打开无效= =）"
                 else:
                     ret_content = "Sorry, failed to get music."
             except Exception as e:
