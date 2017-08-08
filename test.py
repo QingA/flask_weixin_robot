@@ -37,8 +37,6 @@ def test_face():
     print(info['faces'][0]['attributes']['gender'])
 
 
-if __name__ == "__main__":
-    test_face()
 def test_pic():
     url = "http://mmbiz.qpic.cn/mmbiz_jpg/WuEqBMro7GBDEBNg5gtzib7yupEiaicBxIGQSlFlrPZxRerUVRJyzdAzAZm1xCfhS9UbujBbibVOZAXUrJ7UydibCgQ/0"
     r = requests.get(url)
